@@ -1,0 +1,22 @@
+name: CICD_DEMO
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  CICD:
+    name: Testing Ops auth
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Ops auth
+        uses: ./
+        with:
+          APP_ID: ${{ secrets.APP_ID }}
+          INSTALLATION_ID: ${{ secrets.INSTALLATION_ID }}
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+      - name: Test clone
+        run: |
+          git clone git@github.com:adsanz/demo-testing-ga.git test
+          rm -rf test

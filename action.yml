@@ -1,0 +1,42 @@
+name: 'Ops CLI'
+description: 'Run auth as GH App'
+inputs:
+  APP_ID:
+    description: 'App ID'
+    required: true
+  INSTALLATION_ID:
+    description: 'Installation ID'
+    required: true
+  PRIVATE_KEY:
+    description: 'Private key in base64 format with no spaces or new lines'
+    required: true
+
+runs:
+  using: "composite"
+  steps: 
+    - name: SET UP
+      run: |
+        
+        echo "==============================="
+        echo "***       Set creds         ***"
+        echo "==============================="
+        echo "Exporting APP ID, INSTALL ID and Private key"
+        export APP_ID=${{ inputs.APP_ID }}
+        export INSTALLATION_ID=${{ inputs.INSTALLATION_ID }}
+        export PRIVATE_KEY=${{ inputs.PRIVATE_KEY }}
+        export CURRENT_DIR=$(pwd)
+        cd ${{ github.action_path }}
+        pip3 install -r requirements.txt
+        python3 ops.py
+        unset APP_ID INSTALLATION_ID PRIVATE_KEY
+        cd $CURRENT_DIR
+        
+        echo "==============================="
+        echo "***        Git config       ***"
+        echo "==============================="
+        export "HOME=$(python3 -c 'import os; print(os.path.expanduser("~"))')"
+        echo "HOME=$HOME" >> $GITHUB_ENV 
+        git config --global credential.helper store
+        git config --global --replace-all url.https://github.com/.insteadOf git@github.com: 
+        git config --global --add url.https://github.com/.insteadOf ssh://git@github.com/
+      shell: bash
